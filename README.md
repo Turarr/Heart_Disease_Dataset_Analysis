@@ -118,6 +118,14 @@ Mean heart disease risk score for patients without family history: 35.30
 
 **Cohen's d (Effect Size):** 0.376
 
+**Conclusion:** Reject the null hypothesis. The difference is definitely there, but it is considered small. Family history matters, but it isn't the only thing driving the risk score.
+
+**Errors**
+
+**False Positive (Type I):** Claiming family history matters when it actually doesn’t. You’ve set the risk of this happening at 5%.
+
+**False Negative (Type II):** Missing the connection entirely and saying there’s no difference when there actually is.
+
 ### 2. Chi-square Test of Independence
 
 **Hypotheses test:** Analyze the relationship between 'smoking_status' and 'risk_category'
@@ -144,3 +152,78 @@ There is a statistically significant association between smoking status and hear
 
 Smoking status explains a meaningful but not overwhelming portion of variability in risk category.
 
+### 3. ANOVA testing
+
+**Hypotheses test:** Analyze the relationship between 'Age' and 'Risk Category'. Does every risk category have different age groups?
+
+**Null Hypothesis (H0):** The mean age is the same across all heart disease risk categories.
+
+**Alternative Hypothesis (H1):** At least one risk category has a mean age that is different from the others.
+
+**Every risk categories mean age:**
+* Low: 37.0
+* Medium: 55.5
+* High: 73.0
+
+<img width="1489" height="490" alt="image" src="https://github.com/user-attachments/assets/800030ea-179c-495b-9225-25750ece251c" />
+
+**One-way ANOVA results**
+
+**ANOVA F-statistic:** 2030.91
+
+**ANOVA P-value:** 0.000e+00
+
+**Effect Size:**
+
+**Eta-squared (η²):** 0.425
+
+**Post-hoc analysis (Tukey HSD)**
+
+| Group 1 | Group 2 | Mean Difference | p-value (adj) | Lower CI | Upper CI | Significant? |
+| ------- | ------- | --------------- | ------------- | -------- | -------- | ------------ |
+| High    | Low     | -36.0351        | 0.0000        | -37.3672 | -34.7030 | ✅ Yes        |
+| High    | Medium  | -17.5450        | 0.0000        | -18.8236 | -16.2664 | ✅ Yes        |
+| Low     | Medium  | 18.4901         | 0.0000        | 17.3044  | 19.6758  | ✅ Yes        |
+
+
+<img width="860" height="547" alt="image" src="https://github.com/user-attachments/assets/61917ee3-189c-4959-8a4d-63dd5f5b2e88" />
+
+**Conclusion:**
+
+A one-way ANOVA revealed a statistically significant effect of risk category on age, with large effect size. Post-hoc Tukey tests indicated that all three risk groups differed significantly from each other, showing a clear monotonic increase in age from low- to high-risk categories. These findings confirm age as a major contributor to cardiovascular risk stratification.
+
+## Regression or Generalized Linear Model
+
+The variables bmi, age, systolic blood pressure, family history of heart disease used as predictors. These are justified because medical science shows they directly impact heart health. As target we predict the **heart disease risk score**.
+
+**R²** = 0.929
+
+The model explains 92.9% of the variability in heart disease risk scores.
+In medical and public health research, this is an exceptionally strong model fit. It indicates that the included predictors (age, BMI, blood pressure, family history, lifestyle factors) collectively capture most of the variation in risk.
+
+**Prob (F-statistic)** = 0.00
+
+The overall model is highly statistically significant (p < 0.001).
+This means that, taken together, the predictors provide meaningful explanatory power and the model is not due to random chance.
+
+**Interpretation of Individual Predictors**
+
+| Variable                             | Coefficient | Direction     | Interpretation                                                                                                                            | Statistical Significance |
+| ------------------------------------ | ----------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| **family_history_int**               | +9.5351     | ⬆ Risk        | Having a family history of heart disease increases the predicted risk score by **9.54 points** — the strongest overall predictor.         | Significant              |
+| **systolic_bp (mmHg)**               | +0.8046     | ⬆ Risk        | Each 1 mmHg increase in systolic BP increases risk by **0.80 points**. Strongest clinical continuous predictor.                           | Significant              |
+| **stress_level**                     | +0.4755     | ⬆ Risk        | Each 1-point increase in stress raises risk by **0.48 points**.                                                                           | Significant              |
+| **bmi**                              | +0.3915     | ⬆ Risk        | Each 1-unit increase in BMI increases risk by **0.39 points**.                                                                            | Significant              |
+| **age (years)**                      | +0.3075     | ⬆ Risk        | Each additional year of age increases risk by **0.31 points**.                                                                            | Significant              |
+| **cholesterol_mg_dl**                | +0.1230     | ⬆ Risk        | Each 1 mg/dL increase in cholesterol raises risk by **0.12 points** (100 mg/dL → +12 points).                                             | Significant              |
+| **physical_activity_hours_per_week** | −1.3090     | ⬇ Risk        | Each additional hour of weekly exercise reduces risk by **1.31 points** — strongest protective factor.                                    | Significant              |
+| **diet_quality_score**               | −1.1209     | ⬇ Risk        | Each 1-point improvement in diet quality lowers risk by **1.12 points**.                                                                  | Significant              |
+| **alcohol_units_per_week**           | +0.0352     | ⬆ Risk (weak) | Small positive effect, but **not statistically significant (p = 0.216)**. Cannot confidently conclude alcohol impacts risk in this model. | Not Significant          |
+
+**Metrics:**
+
+**MAE (6.08):** On average, your model's predictions are off by about 6 points. Given that your risk scores go up to 100, a 6% average error is quite low.
+
+**MSE (56.96):** This penalizes larger errors more heavily. Since this number isn't massive compared to the MAE, it suggests you don't have too many "extreme" outliers where the model was catastrophically wrong.
+
+<img width="1034" height="490" alt="image" src="https://github.com/user-attachments/assets/5c0097a1-0733-4f45-84d5-faef8ce95158" />
